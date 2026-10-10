@@ -1,0 +1,50 @@
+SOFKA QA - EJERCICIO DE PERFORMANCE
+HALLAZGOS Y CONCLUSIONES DE LA PRUEBA DE CARGA
+
+OBJETIVO
+Evaluar el servicio POST https://fakestoreapi.com/auth/login mediante JMeter, con credenciales parametrizadas desde CSV, verificando una tasa mínima de 20 TPS, un límite de respuesta de 1.500 ms y un porcentaje de errores menor al 3 %.
+
+ENTORNO Y CONFIGURACIÓN
+Apache JMeter 5.6.3, Java 27 y Windows 11. Ejecución en modo no gráfico, con 25 usuarios virtuales, 5 segundos de ramp-up y 10 iteraciones por usuario. Se utilizó un archivo CSV con cinco conjuntos de credenciales y una Duration Assertion configurada en 1.500 ms.
+
+RESULTADOS OBSERVADOS
+Total de peticiones: 250.
+Throughput promedio reportado en el dashboard HTML: 28,17 transacciones por segundo.
+Tiempo promedio de respuesta: 445,41 ms.
+Tiempo mínimo: 340 ms.
+Tiempo máximo: 2.203 ms.
+Mediana: 371,00 ms.
+Percentil 90: 568,00 ms.
+Percentil 95: 834,85 ms.
+Percentil 99: 2.134,76 ms.
+Peticiones satisfactorias según JMeter: 244 (97,60 %).
+Peticiones marcadas como fallidas: 6 (2,40 %).
+Códigos de respuesta HTTP registrados: 250 respuestas 201 Created.
+
+ANÁLISIS DE LOS FALLOS
+Las seis peticiones fallidas superaron el límite de duración configurado en JMeter. Sus tiempos fueron 1.539 ms, 1.762 ms, 1.899 ms, 2.123 ms, 2.147 ms y 2.203 ms. 
+Todos estos casos recibieron respuesta HTTP 201, pero fueron considerados fallidos por la Duration Assertion. 
+En los resultados proporcionados no se identificaron fallos HTTP ni errores de conexión para esta ejecución.
+
+EVALUACIÓN DE LOS CRITERIOS
+El rendimiento promedio de 28,17 TPS supera el mínimo solicitado de 20 TPS. 
+La tasa de errores de 2,40 % es inferior al límite estricto del 3 %. 
+El 97,60 % de las solicitudes se completó dentro de 1.500 ms; seis superaron ese umbral. 
+
+Bajo una interpretación conjunta del criterio de duración y la tolerancia explícita de errores inferior al 3 %, se considera que el escenario CUMPLE GLOBALMENTE los criterios de aceptación, registrando y aceptando las seis excepciones temporales dentro de esa tolerancia. 
+
+HALLAZGOS Y LIMITACIONES
+La mediana y el promedio se mantienen por debajo de 1.500 ms, pero el percentil 99 y el máximo muestran una cola de respuestas lentas que merece atención. 
+La ejecución fue breve y se realizó contra una API pública, de modo que las diferencias de tiempo pueden incluir efectos de red, conexión y variabilidad del entorno. 
+No se atribuye una causa específica a las seis demoras sin evidencia adicional.
+
+CONCLUSIÓN
+Se alcanzó un throughput superior al objetivo y una tasa total de errores inferior al máximo permitido. 
+La Duration Assertion permitió identificar seis respuestas que excedieron 1.500 ms, aunque el servicio contestó con HTTP 201 en las 250 solicitudes. 
+El resultado global se considera aceptable bajo la tolerancia de errores descrita, sin ocultar las excepciones ni presentar el tiempo máximo de 2.203 ms como conforme al umbral individual. 
+El archivo resultados.jtl y el dashboard HTML constituyen las evidencias de esta conclusión.
+
+RECOMENDACIÓN
+Mantener la evaluación de tiempos máximos y tasa de errores sobre ejecuciones reproducibles. 
+Para un entorno de producción o una evaluación más amplia, convendría acordar expresamente si el tiempo objetivo corresponde al 100 % de las transacciones o a un porcentaje de cumplimiento, y comprobar el comportamiento durante una ventana sostenida con monitoreo del sistema. 
+Estas actividades no forman parte del alcance ejecutado en este ejercicio.
